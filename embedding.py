@@ -1,32 +1,36 @@
 from logging import Logger
 from gensim.models import KeyedVectors
+import ast
 import numpy as np
 import os
 import pandas as pd
+from tqdm import tqdm
 
 
-class Embedding:
+class TextVectorizer:
     MODEL_NAME = "GoogleNews-vectors-negative300.bin"
+
+    CHUNK_SIZE = 100000
+
+    COLUMNS = ["content"]
 
     def __init__(
         self,
-        output_dir: str,
+        data_dir: str,
+        workspace: str,
         logger: Logger,
-        method: str = "Word2Vec",
-        pretrained: bool = True,
+        num: int = 25000,
+        method: str = "word2vec",
     ):
-        self.output_dir = output_dir
+        self.data_dir = data_dir
+        self.workspace = workspace
         self.logger = logger
+        self.num = num
+        self.method = method
         self.model = None
 
-        if method == "Word2Vec":
-            if pretrained:
-                self.model = KeyedVectors.load_word2vec_format(
-                    self.MODEL_NAME, binary=True
-                )
-                self.logger.info(
-                    f"Loaded pretrained Word2Vec model: {os.path.basename(self.MODEL_NAME)[0]}"
-                )
+        if method == "word2vec":
+            self.model = KeyedVectors.load_word2vec_format(self.MODEL_NAME, binary=True)
 
     def _build_vector(self, text: str):
         vec = np.zeros(self.model.vector_size).reshape((1, self.model.vector_size))
@@ -42,14 +46,30 @@ class Embedding:
         if count != 0:
             vec /= count
 
+        self.progress_bar.update(1)
+
         return vec
 
-    def process(self, mode: str, df: pd.DataFrame) -> pd.DataFrame:
-        self.logger.info("Start building vectors...")
+    def _process_data(self, mode: str) -> None:
+        self.logger.info(f"Start building {mode} vectors...")
 
-        df["vector"] = df["content"].apply(lambda x: self._build_vector(x, self.model))
-        df.to_csv(os.path.join(self.output_dir, f"embedded_{mode}.csv"), index=False)
+        data_path = os.path.join(self.data_dir, f"{mode}.csv")
+        datas = list()
+        self.progress_bar = tqdm(total=self.num, desc=f"Processing {mode}")
 
-        self.logger.info("Finish building vectors")
+        for chunk in pd.read_csv(
+            data_path, chunksize=self.CHUNK_SIZE, usecols=self.COLUMNS
+        ):
+            datas.append(
+                chunk["content"].apply(ast.literal_eval).apply(self._build_vector)
+            )
 
-        return df
+        arr = np.vstack(pd.concat(datas))
+        npy_path = os.path.join(self.workspace, f"{self.method}_{mode}.npy")
+        np.save(npy_path, arr)
+
+        self.logger.info(f"Save vectors to {npy_path}")
+
+    def process(self):
+        self._process_data("train")
+        self._process_data("test")

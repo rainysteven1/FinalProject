@@ -133,7 +133,7 @@ class DatasetPreprocessor:
 
         return pd.concat([df_pos, df_neg], ignore_index=True)
 
-    def _process_dataset_partition(self, mode: str) -> pd.DataFrame:
+    def _process_dataset_partition(self, mode: str) -> None:
         self.logger.info(f"Start processing {mode} dataset...")
 
         df = self._load_sentiment_dataset(mode)
@@ -147,10 +147,6 @@ class DatasetPreprocessor:
         )
         self.logger.info(f"Processed {mode} dataset")
 
-        return df
-
-    def process_datasets(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        df_train = self._process_dataset_partition("train")
-        df_test = self._process_dataset_partition("test")
-
-        return df_train, df_test
+    def process_datasets(self) -> None:
+        self._process_dataset_partition("train")
+        self._process_dataset_partition("test")
