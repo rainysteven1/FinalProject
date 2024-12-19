@@ -8,8 +8,6 @@ from tqdm import tqdm
 
 
 class TextVectorizer:
-    MODEL_NAME = "GoogleNews-vectors-negative300.bin"
-
     CHUNK_SIZE = 100000
 
     COLUMNS = ["content"]
@@ -19,8 +17,9 @@ class TextVectorizer:
         data_dir: str,
         workspace: str,
         logger: Logger,
-        num: int = 25000,
-        method: str = "word2vec",
+        num: int,
+        method: str,
+        model_name: str,
     ):
         self.data_dir = data_dir
         self.workspace = workspace
@@ -30,7 +29,7 @@ class TextVectorizer:
         self.model = None
 
         if method == "word2vec":
-            self.model = KeyedVectors.load_word2vec_format(self.MODEL_NAME, binary=True)
+            self.model = KeyedVectors.load_word2vec_format(model_name, binary=True)
 
     def _build_vector(self, text: str):
         vec = np.zeros(self.model.vector_size).reshape((1, self.model.vector_size))
@@ -41,7 +40,7 @@ class TextVectorizer:
                 vec += self.model[word].reshape((1, self.model.vector_size))
                 count += 1
             except KeyError:
-                continue  # 如果词不在模型中，跳过
+                continue 
 
         if count != 0:
             vec /= count

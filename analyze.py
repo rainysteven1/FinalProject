@@ -1,4 +1,5 @@
 from typing import Dict, Tuple
+from logging import Logger
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -20,12 +21,15 @@ class Analysis:
 
     def __init__(
         self,
+        data_dir: str,
         workspace: str,
+        logger: Logger,
         embedding_method: str,
         pca_dim: int,
         algorithm: str,
         param_grid: Dict,
     ):
+        self.data_dir = data_dir
         self.workspace = workspace
         self.embedding_method = embedding_method
         self.algorithm = algorithm
@@ -35,7 +39,7 @@ class Analysis:
 
     def _read_data(self, mode: str) -> Tuple[np.ndarray, pd.Series]:
         df = pd.read_csv(
-            os.path.join(self.workspace, f"{mode}.csv"), usecols=self.COLUMNS
+            os.path.join(self.data_dir, f"{mode}.csv"), usecols=self.COLUMNS
         )
 
         x = np.load(
@@ -54,7 +58,7 @@ class Analysis:
         X_test, y_test = self._read_data("test")
 
         model = self.ALGORITHMS[self.algorithm]()
-        clf = GridSearchCV(model, self.param_grid, cv=5)
+        clf = GridSearchCV(model, self.param_grid, cv=2)
 
         clf.fit(X_train, y_train)
 

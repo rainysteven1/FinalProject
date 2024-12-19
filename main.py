@@ -15,12 +15,12 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--preprocess", type=bool, default=False)
     args = parser.parse_args()
 
-    with open(CONFIG_PATH) as f:
+    with open(CONFIG_PATH, "r") as f:
         config = json.load(f)
 
     now = datetime.now()
     formatted_now = now.strftime("%Y-%m-%d-%H-%M-%S")
-    data_dir = os.path.join(config["data_dir"], formatted_now)
+    data_dir = os.path.join(config["data_dir"])
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
 
@@ -38,20 +38,21 @@ if __name__ == "__main__":
         dp.process_datasets()
 
     logger.info("-" * 15 + "Embedding" + "-" * 15)
-    for method in config["embedding"]:
+    for params in config["embedding"]:
         vectorizer = TextVectorizer(
-            data_dir, workspace, logger, f["dataset"]["num"], method
+            data_dir, workspace, logger, config["dataset"]["num"], **params
         )
-        vectorizer.process("train")
-        vectorizer.process("test")
+        vectorizer.process()
 
     logger.info("-" * 15 + "Classification" + "-" * 15)
-    for embedding_method in config["embedding"]:
-        for param_grid in config["classification"]["configs"]:
+    for embedding_params in config["embedding"]:
+        for params in config["classification"]["configs"]:
             analyses = Analysis(
+                data_dir,
                 workspace,
-                embedding_method,
+                logger,
+                embedding_params["method"],
                 config["classification"]["pca_dim"],
-                param_grid,
+                **params,
             )
             analyses.classify()
