@@ -24,18 +24,22 @@ class Analysis:
         data_dir: str,
         workspace: str,
         logger: Logger,
-        embedding_method: str,
+        embedding_prefix: str,
         pca_dim: int,
         algorithm: str,
         param_grid: Dict,
     ):
         self.data_dir = data_dir
         self.workspace = workspace
-        self.embedding_method = embedding_method
+        self.logger = logger
+        self.embedding_prefix = embedding_prefix
         self.algorithm = algorithm
         self.param_grid = param_grid
 
         self.pca = PCA(n_components=pca_dim)
+
+        self.logger.info(f"Embedding Prefix: {self.embedding_prefix}")
+        self.logger.info(f"Param_Grid: {self.param_grid}")
 
     def _read_data(self, mode: str) -> Tuple[np.ndarray, pd.Series]:
         df = pd.read_csv(
@@ -43,7 +47,7 @@ class Analysis:
         )
 
         x = np.load(
-            os.path.join(self.workspace, f"{self.embedding_method}_{mode}.npy"),
+            os.path.join(self.workspace, f"{self.embedding_prefix}_{mode}.npy"),
             allow_pickle=True,
         )
         x = self.SCALER.fit_transform(x)
@@ -65,7 +69,10 @@ class Analysis:
         cv_results = clf.cv_results_
         df_results = pd.DataFrame(cv_results)
         df_results.to_csv(
-            os.path.join(self.workspace, f"{self.algorithm}.csv"), index=False
+            os.path.join(
+                self.workspace, f"{self.embedding_prefix}_{self.algorithm}.csv"
+            ),
+            index=False,
         )
 
         self.logger.info(f"Best params: {clf.best_params_}")

@@ -38,20 +38,21 @@ if __name__ == "__main__":
         dp.process_datasets()
 
     logger.info("-" * 15 + "Embedding" + "-" * 15)
+    embedding_prefix_list = list()
     for params in config["embedding"]:
         vectorizer = TextVectorizer(
             data_dir, workspace, logger, config["dataset"]["num"], **params
         )
-        vectorizer.process()
+        embedding_prefix_list.append(vectorizer.process())
 
     logger.info("-" * 15 + "Classification" + "-" * 15)
-    for embedding_params in config["embedding"]:
+    for embedding_prefix in embedding_prefix_list:
         for params in config["classification"]["configs"]:
             analyses = Analysis(
                 data_dir,
                 workspace,
                 logger,
-                embedding_params["method"],
+                embedding_prefix,
                 config["classification"]["pca_dim"],
                 **params,
             )
