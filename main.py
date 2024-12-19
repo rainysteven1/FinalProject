@@ -1,5 +1,6 @@
 from datetime import datetime
 from download import download_data
+from embedding import Embedding
 from logger import create_logger
 from preprocess import DatasetPreprocessor
 import os
@@ -19,5 +20,11 @@ if __name__ == "__main__":
     input_dir = download_data("./input", url, logger)
     stopwords_path = "./resources/stopwords.txt"
 
+    logger.info("-" * 15 + "Preprocessing" + "-" * 15)
     dp = DatasetPreprocessor(input_dir, working_path, stopwords_path, logger)
-    dp.process_datasets()
+    df_train, df_test = dp.process_datasets()
+
+    logger.info("-" * 15 + "Embedding" + "-" * 15)
+    e = Embedding(working_path, logger)
+    df_train = e.process("train", df_train)
+    df_test = e.process("test", df_test)

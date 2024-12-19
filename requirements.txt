@@ -9,6 +9,7 @@ click==8.1.7
 cloudpathlib==0.20.0
 confection==0.1.5
 cymem==2.0.10
+gensim==4.3.3
 idna==3.10
 Jinja2==3.1.4
 langcodes==3.5.0
@@ -18,7 +19,7 @@ markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 mdurl==0.1.2
 murmurhash==1.0.11
-numpy==2.2.0
+numpy==1.26.4
 packaging==24.2
 pandas==2.2.3
 preshed==3.0.9
@@ -29,6 +30,7 @@ python-dateutil==2.9.0.post0
 pytz==2024.2
 requests==2.32.3
 rich==13.9.4
+scipy==1.13.1
 shellingham==1.5.4
 six==1.17.0
 smart-open==7.1.0

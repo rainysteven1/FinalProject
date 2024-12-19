@@ -1,8 +1,9 @@
+from logging import Logger
 import logging
 import os
 
 
-def create_logger(working_path: str, level: str = logging.INFO) -> None:
+def create_logger(working_path: str, level: str = logging.INFO) -> Logger:
     logger = logging.getLogger()
     logger.setLevel(level)
 

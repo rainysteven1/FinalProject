@@ -161,10 +161,12 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-
 log
 input
 output
 *.db
 .idea
 .vscode
+.DS_STORE
+resources
+!resources/stopwords.txt

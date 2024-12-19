@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from bs4 import BeautifulSoup
 from functools import reduce
 from logging import Logger
@@ -133,17 +133,24 @@ class DatasetPreprocessor:
 
         return pd.concat([df_pos, df_neg], ignore_index=True)
 
-    def _process_dataset_partition(self, mode: str) -> None:
+    def _process_dataset_partition(self, mode: str) -> pd.DataFrame:
         self.logger.info(f"Start processing {mode} dataset...")
 
-        df = self._load_sentiment_dataset(mode).head(5)
-        text_preprocessor = _TextPreprocessor(df.shape[0], self.stopwords_path)
+        df = self._load_sentiment_dataset(mode)
+        df.to_csv(os.path.join(self.output_dir, f"{mode}.csv"), index=False)
 
+        text_preprocessor = _TextPreprocessor(df.shape[0], self.stopwords_path)
         df.loc[:, "content"] = df["content"].apply(text_preprocessor.process_text)
 
-        df.to_csv(os.path.join(self.output_dir, f"{mode}.csv"), index=False)
+        df.to_csv(
+            os.path.join(self.output_dir, f"preprocessed_{mode}.csv"), index=False
+        )
         self.logger.info(f"Processed {mode} dataset")
 
-    def process_datasets(self) -> None:
-        self._process_dataset_partition("train")
-        self._process_dataset_partition("test")
+        return df
+
+    def process_datasets(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        df_train = self._process_dataset_partition("train")
+        df_test = self._process_dataset_partition("test")
+
+        return df_train, df_test
