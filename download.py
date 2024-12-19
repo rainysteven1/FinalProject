@@ -1,5 +1,4 @@
 from logging import Logger
-from logger import create_logger
 import os
 import shutil
 import tarfile
@@ -21,14 +20,14 @@ def download_data(input_path: str, url: str, logger: Logger) -> str:
     if zipfile.is_zipfile(file):
         logger.info(f"Extracting zip file {file}")
 
-        with zipfile.ZipFile(file, 'r') as f:
+        with zipfile.ZipFile(file, "r") as f:
             file_names = f.namelist()
             f.extractall(input_path)
 
     if tarfile.is_tarfile(file):
         logger.info(f"Extracting tar file {file}")
 
-        with tarfile.open(file, 'r') as f:
+        with tarfile.open(file, "r") as f:
             file_names = f.getnames()
             f.extractall(input_path)
 
