@@ -10,6 +10,8 @@ run:
 		--privileged \
 		-v $(PWD):/app \
 		-e TZ=Asia/Shanghai \
+		--cpus="8" \
+		--memory="16g" \
 		project:latest python main.py
 
 stop-and-remove-all:
